@@ -47,6 +47,23 @@ const compareUserPW = (req, res, next) => {
   // You'll need to find the user in your DB
   // Once you have the user, you'll need to pass the encrypted pw and the plaintext pw to the compare function
   // If the passwords match set the username on `req` ==> req.username = user.username; and call next();
+  User.findOne({ username })
+    .then((foundUser) => {
+      const foundHash = foundUser.password;
+      bcrypt.compare(password, foundHash, (error, sucess) => {
+        if (error) {
+          res.status(422).json(error);
+          return;
+        }
+        if (sucess) {
+          req.username = foundUser.username;
+          next();
+        }
+      })
+    })
+    .catch((err) => {
+      res.status(422).json(err);
+    })
 };
 
 module.exports = {
